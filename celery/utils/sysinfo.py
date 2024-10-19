@@ -10,9 +10,19 @@ __all__ = ('load_average', 'df')
 
 
 if hasattr(os, 'getloadavg'):
+    try:
+        os.getloadavg()
 
-    def _load_average() -> tuple[float, ...]:
-        return tuple(ceil(l * 1e2) / 1e2 for l in os.getloadavg())
+        # Function 'getloadavg' works, load normally
+        def _load_average() -> tuple[float, ...]:
+            return tuple(ceil(l * 1e2) / 1e2 for l in os.getloadavg())
+
+    except OSError as e:
+        # Function 'getloadavg' fails, replace by dummy
+        print(f"getloadavg OSError: {e}, fallback to dummy version")
+
+        def _load_average() -> tuple[float, ...]:
+            return 0.0, 0.0, 0.0,
 
 else:  # pragma: no cover
     # Windows doesn't have getloadavg
